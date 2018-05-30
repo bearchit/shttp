@@ -19,6 +19,7 @@ type (
 )
 
 type Engine struct {
+	prefix       string
 	router       *httprouter.Router
 	middlewares  []Middleware
 	ErrorHandler ErrorHandler
@@ -44,6 +45,17 @@ func (e *Engine) Use(middleware ...Middleware) {
 	e.middlewares = append(e.middlewares, middleware...)
 }
 
+func (e Engine) Sub(prefix string) *Engine {
+	ne := &Engine{
+		prefix:       prefix,
+		router:       e.router,
+		ErrorHandler: e.ErrorHandler,
+	}
+	copy(ne.middlewares, e.middlewares)
+
+	return ne
+}
+
 func (e Engine) wrapHandler(handler HandlerFunc) httprouter.Handle {
 	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, pathParams httprouter.Params) {
 		ctx := &Context{
@@ -63,8 +75,12 @@ func (e Engine) wrapHandler(handler HandlerFunc) httprouter.Handle {
 	})
 }
 
+func (e Engine) joinPath(pattern string) string {
+	return e.prefix + pattern
+}
+
 func (e Engine) GET(pattern string, handler HandlerFunc) {
-	e.router.GET(pattern, e.wrapHandler(handler))
+	e.router.GET(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
 func (e Engine) POST(pattern string, handler HandlerFunc) {
