@@ -13,16 +13,16 @@ import (
 )
 
 func Test(t *testing.T) {
-	s := New()
+	r := New()
 
-	s.GET("/", func(c *Context) error {
+	r.GET("/", func(c *Context) error {
 		return c.String(http.StatusOK, "Hello")
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
-	s.ServeHTTP(rec, req)
+	r.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -47,16 +47,16 @@ func TestMiddleware(t *testing.T) {
 		}
 	}
 
-	s := New()
-	s.Use(mw1, mw2)
-	s.GET("/", func(c *Context) error {
+	r := New()
+	r.Use(mw1, mw2)
+	r.GET("/", func(c *Context) error {
 		return c.String(http.StatusOK, "Hello")
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
-	s.ServeHTTP(rec, req)
+	r.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -67,22 +67,22 @@ func TestMiddleware(t *testing.T) {
 }
 
 func TestEngine_Sub(t *testing.T) {
-	s := New()
-	a := s.Sub("/a")
+	r := New()
+	a := r.Sub("/a")
 	assert.Equal(t, "/a", a.prefix)
 }
 
 func TestJoinPath(t *testing.T) {
-	s := New()
-	a := s.Sub("/a")
+	r := New()
+	a := r.Sub("/a")
 	assert.Equal(t, "/a/hello", a.joinPath("/hello"))
 }
 
 func TestSubroute(t *testing.T) {
-	s := New()
+	r := New()
 
 	{
-		sub1 := s.Sub("/sub1")
+		sub1 := r.Sub("/sub1")
 		sub1.GET("/hello", func(c *Context) error {
 			return c.String(http.StatusOK, "/sub1/hello")
 		})
@@ -93,7 +93,7 @@ func TestSubroute(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/sub1/hello", nil)
 		rec := httptest.NewRecorder()
 
-		s.ServeHTTP(rec, req)
+		r.ServeHTTP(rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		b, err := ioutil.ReadAll(rec.Body)
@@ -102,7 +102,7 @@ func TestSubroute(t *testing.T) {
 		assert.Equal(t, "/sub1/hello", string(b))
 	}
 	{
-		sub2 := s.Sub("/sub2")
+		sub2 := r.Sub("/sub2")
 		sub2.GET("/hello", func(c *Context) error {
 			return c.String(http.StatusOK, "/sub2/hello")
 		})
@@ -113,7 +113,7 @@ func TestSubroute(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/sub2/hello", nil)
 		rec := httptest.NewRecorder()
 
-		s.ServeHTTP(rec, req)
+		r.ServeHTTP(rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		b, err := ioutil.ReadAll(rec.Body)
@@ -125,12 +125,12 @@ func TestSubroute(t *testing.T) {
 }
 
 func TestSubroute_ErrorHandler(t *testing.T) {
-	s := New()
-	s.GET("/", func(c *Context) error {
+	r := New()
+	r.GET("/", func(c *Context) error {
 		return errors.New("")
 	})
 
-	sub := s.Sub("/a")
+	sub := r.Sub("/a")
 	sub.ErrorHandler = ErrorHandler(func(c *Context, err error) {
 		c.String(http.StatusBadRequest, fmt.Sprintf("Error from sub"))
 	})
@@ -142,7 +142,7 @@ func TestSubroute_ErrorHandler(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		rec := httptest.NewRecorder()
 
-		s.ServeHTTP(rec, req)
+		r.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	}
 
@@ -150,21 +150,21 @@ func TestSubroute_ErrorHandler(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/a/hello", nil)
 		rec := httptest.NewRecorder()
 
-		s.ServeHTTP(rec, req)
+		r.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	}
 }
 
 func TestContext_NoContent(t *testing.T) {
-	s := New()
-	s.GET("/", func(c *Context) error {
+	r := New()
+	r.GET("/", func(c *Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
-	s.ServeHTTP(rec, req)
+	r.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 

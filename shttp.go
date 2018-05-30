@@ -18,7 +18,7 @@ type (
 	Middleware   func(HandlerFunc) HandlerFunc
 )
 
-type Engine struct {
+type Router struct {
 	prefix       string
 	router       *httprouter.Router
 	middlewares  []Middleware
@@ -30,23 +30,23 @@ func defaultErrorHandler(c *Context, err error) {
 	fmt.Fprintf(c.Response, err.Error())
 }
 
-func New() *Engine {
-	return &Engine{
+func New() *Router {
+	return &Router{
 		router:       httprouter.New(),
 		ErrorHandler: defaultErrorHandler,
 	}
 }
 
-func (e Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (e Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	e.router.ServeHTTP(w, r)
 }
 
-func (e *Engine) Use(middleware ...Middleware) {
+func (e *Router) Use(middleware ...Middleware) {
 	e.middlewares = append(e.middlewares, middleware...)
 }
 
-func (e Engine) Sub(prefix string) *Engine {
-	ne := &Engine{
+func (e Router) Sub(prefix string) *Router {
+	ne := &Router{
 		prefix:       prefix,
 		router:       e.router,
 		ErrorHandler: e.ErrorHandler,
@@ -56,7 +56,7 @@ func (e Engine) Sub(prefix string) *Engine {
 	return ne
 }
 
-func (e Engine) wrapHandler(handler HandlerFunc) httprouter.Handle {
+func (e Router) wrapHandler(handler HandlerFunc) httprouter.Handle {
 	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, pathParams httprouter.Params) {
 		ctx := &Context{
 			Request:    r,
@@ -75,31 +75,31 @@ func (e Engine) wrapHandler(handler HandlerFunc) httprouter.Handle {
 	})
 }
 
-func (e Engine) joinPath(pattern string) string {
+func (e Router) joinPath(pattern string) string {
 	return e.prefix + pattern
 }
 
-func (e Engine) GET(pattern string, handler HandlerFunc) {
+func (e Router) GET(pattern string, handler HandlerFunc) {
 	e.router.GET(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
-func (e Engine) POST(pattern string, handler HandlerFunc) {
+func (e Router) POST(pattern string, handler HandlerFunc) {
 	e.router.POST(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
-func (e Engine) PUT(pattern string, handler HandlerFunc) {
+func (e Router) PUT(pattern string, handler HandlerFunc) {
 	e.router.PUT(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
-func (e Engine) PATCH(pattern string, handler HandlerFunc) {
+func (e Router) PATCH(pattern string, handler HandlerFunc) {
 	e.router.PATCH(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
-func (e Engine) DELETE(pattern string, handler HandlerFunc) {
+func (e Router) DELETE(pattern string, handler HandlerFunc) {
 	e.router.DELETE(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
-func (e Engine) OPTIONS(pattern string, handler HandlerFunc) {
+func (e Router) OPTIONS(pattern string, handler HandlerFunc) {
 	e.router.OPTIONS(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
