@@ -79,6 +79,10 @@ func (e Router) joinPath(pattern string) string {
 	return e.prefix + pattern
 }
 
+func (e Router) Static(pattern string, root string) {
+	e.router.ServeFiles(pattern+"/*filepath", http.Dir(root))
+}
+
 func (e Router) GET(pattern string, handler HandlerFunc) {
 	e.router.GET(e.joinPath(pattern), e.wrapHandler(handler))
 }

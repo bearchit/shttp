@@ -172,3 +172,18 @@ func TestContext_NoContent(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(b))
 }
+
+func TestRouter_Static(t *testing.T) {
+	r := New()
+	r.Static("/static", "test/static")
+
+	req := httptest.NewRequest(http.MethodGet, "/static/a.html", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	b, err := ioutil.ReadAll(rec.Body)
+	assert.NoError(t, err)
+	t.Log(string(b))
+}
