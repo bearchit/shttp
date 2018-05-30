@@ -84,23 +84,23 @@ func (e Engine) GET(pattern string, handler HandlerFunc) {
 }
 
 func (e Engine) POST(pattern string, handler HandlerFunc) {
-	e.router.POST(pattern, e.wrapHandler(handler))
+	e.router.POST(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
 func (e Engine) PUT(pattern string, handler HandlerFunc) {
-	e.router.PUT(pattern, e.wrapHandler(handler))
+	e.router.PUT(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
 func (e Engine) PATCH(pattern string, handler HandlerFunc) {
-	e.router.PATCH(pattern, e.wrapHandler(handler))
+	e.router.PATCH(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
 func (e Engine) DELETE(pattern string, handler HandlerFunc) {
-	e.router.DELETE(pattern, e.wrapHandler(handler))
+	e.router.DELETE(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
 func (e Engine) OPTIONS(pattern string, handler HandlerFunc) {
-	e.router.OPTIONS(pattern, e.wrapHandler(handler))
+	e.router.OPTIONS(e.joinPath(pattern), e.wrapHandler(handler))
 }
 
 type Context struct {
