@@ -115,6 +115,11 @@ const (
 	MimeHTML      = "text/html"
 )
 
+func (c Context) NoContent(status int) error {
+	c.Response.WriteHeader(status)
+	return nil
+}
+
 func (c Context) String(status int, v string) error {
 	c.Response.WriteHeader(status)
 	c.Response.Header().Set("Content-Type", MimePlainText)

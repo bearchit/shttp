@@ -154,3 +154,21 @@ func TestSubroute_ErrorHandler(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	}
 }
+
+func TestContext_NoContent(t *testing.T) {
+	s := New()
+	s.GET("/", func(c *Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+
+	s.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	b, err := ioutil.ReadAll(rec.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(b))
+}
