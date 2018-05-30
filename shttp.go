@@ -20,6 +20,7 @@ type (
 
 type Engine struct {
 	router       *httprouter.Router
+	middlewares  []Middleware
 	ErrorHandler ErrorHandler
 }
 
@@ -39,6 +40,10 @@ func (e Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	e.router.ServeHTTP(w, r)
 }
 
+func (e *Engine) Use(middleware ...Middleware) {
+	e.middlewares = append(e.middlewares, middleware...)
+}
+
 func (e Engine) wrapHandler(handler HandlerFunc) httprouter.Handle {
 	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, pathParams httprouter.Params) {
 		ctx := &Context{
@@ -47,7 +52,12 @@ func (e Engine) wrapHandler(handler HandlerFunc) httprouter.Handle {
 			PathParams: pathParams,
 		}
 
-		if err := handler(ctx); err != nil {
+		h := handler
+		for i := len(e.middlewares) - 1; i >= 0; i-- {
+			h = e.middlewares[i](h)
+		}
+
+		if err := h(ctx); err != nil {
 			e.ErrorHandler(ctx, err)
 		}
 	})
