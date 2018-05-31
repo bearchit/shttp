@@ -185,5 +185,5 @@ func TestRouter_Static(t *testing.T) {
 
 	b, err := ioutil.ReadAll(rec.Body)
 	assert.NoError(t, err)
-	t.Log(string(b))
+	assert.Equal(t, "<h1>A</h1>", string(b))
 }
