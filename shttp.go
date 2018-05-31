@@ -111,6 +111,28 @@ type Context struct {
 	Request    *http.Request
 	Response   http.ResponseWriter
 	PathParams httprouter.Params
+	Values     map[string]interface{}
+}
+
+func (c *Context) Set(key string, v interface{}) {
+	if c.Values == nil {
+		c.Values = make(map[string]interface{})
+	}
+
+	c.Values[key] = v
+}
+
+func (c Context) Get(key string) (interface{}, bool) {
+	v, ok := c.Values[key]
+	return v, ok
+}
+
+func (c Context) MustGet(key string) interface{} {
+	v, ok := c.Get(key)
+	if !ok {
+		panic(fmt.Errorf("key %s is not exist", key))
+	}
+	return v
 }
 
 const (

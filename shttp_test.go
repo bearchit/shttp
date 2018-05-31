@@ -187,3 +187,26 @@ func TestRouter_Static(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "<h1>A</h1>", string(b))
 }
+
+func TestRequestContext(t *testing.T) {
+	r := New()
+
+	r.Use(func(next HandlerFunc) HandlerFunc {
+		return func(c *Context) error {
+			c.Set("msg", "hello")
+			return next(c)
+		}
+	})
+	r.GET("/", func(c *Context) error {
+		msg, ok := c.MustGet("msg").(string)
+		assert.True(t, ok)
+		assert.Equal(t, "hello", msg)
+		return nil
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
