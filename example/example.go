@@ -1,6 +1,3 @@
-## Usage
-
-```go
 package main
 
 import (
@@ -51,4 +48,3 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
-```
