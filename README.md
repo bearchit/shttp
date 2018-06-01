@@ -1,5 +1,8 @@
-## Usage
+Simple HTTP Server Library
+---
+[![Go Report Card](https://goreportcard.com/badge/github.com/bearchit/shttp)](https://goreportcard.com/report/github.com/bearchit/shttp)
 
+## Usage
 ```go
 package main
 
